@@ -43,7 +43,13 @@ void print_matrix(const char* name, float* matrix, size_t size) {
 void create_result_directory() {
     struct stat st = {0};
     if (stat("Result", &st) == -1) {
-        mkdir("Result", 0700);
+        if (mkdir("Result", 0700) == 0) {
+            printf("Result directory created successfully.\n");
+        } else {
+            perror("Error creating Result directory");
+        }
+    } else {
+        printf("Result directory already exists.\n");
     }
 }
 

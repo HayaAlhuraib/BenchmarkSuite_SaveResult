@@ -163,30 +163,30 @@ int main(int argc, char** argv) {
     /* Export input matrices */
     export_matrix_to_csv("matrix_A.csv", A, size);
     export_matrix_to_csv("matrix_B.csv", B, size);
-
-    /* Compare Naive and Optimized Implementations */
+   
+   /* Compare Naive and Optimized Implementations */
     float* R_naive = malloc(size * size * sizeof(float));
     args_t args_naive = { .input = input, .output = R_naive, .size = size };
 
     clock_t start = clock();
     impl_scalar_naive(&args_naive);
     clock_t end = clock();
-    double naive_time = (double)(end - start) / CLOCKS_PER_SEC;
-    print_matrix("Result Matrix R (Naive)", R_naive, size);
-   
     export_matrix_to_csv("result_naive.csv", R_naive, size);
+    double naive_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    printf("Naive Runtime: %.6f seconds\n", naive_time);
+    print_matrix("Result Matrix R (Naive)", R_naive, size);
 
     args_t args_opt = { .input = input, .output = R, .size = size };
 
     start = clock();
     impl_scalar_opt(&args_opt);
     end = clock();
-    double opt_time = (double)(end - start) / CLOCKS_PER_SEC;
-    print_matrix("Result Matrix R (Optimized)", R, size);
     export_matrix_to_csv("result_optimized.csv", R, size);
-    printf("Naive Runtime: %.6f seconds\n", naive_time);
-    printf("Optimized Runtime: %.6f seconds\n", opt_time);
+    double opt_time = (double)(end - start) / CLOCKS_PER_SEC;
 
+    printf("Optimized Runtime: %.6f seconds\n", opt_time);
+    print_matrix("Result Matrix R (Optimized)", R, size);
 
     printf("Speedup: %.2fx\n", naive_time / opt_time);
 

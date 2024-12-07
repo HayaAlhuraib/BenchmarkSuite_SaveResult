@@ -156,8 +156,8 @@ int main(int argc, char** argv) {
     }
     
     /* Print input matrices */
-    print_matrix("Matrix A", A, size);
-    print_matrix("Matrix B", B, size);
+   /* print_matrix("Matrix A", A, size);*/
+   /* print_matrix("Matrix B", B, size);*/
 
 
     /* Export input matrices */

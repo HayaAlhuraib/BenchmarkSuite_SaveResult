@@ -49,7 +49,7 @@ void create_result_directory() {
             perror("Error creating Result directory");
         }
     } else {
-        printf("Result directory already exists.\n");
+        printf("\n ");
     }
 }
 

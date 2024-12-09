@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
     double opt_time = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("Optimized Runtime: %.6f seconds\n", opt_time);
-    print_matrix("Result Matrix R (Optimized)", R, size);*/
+    /* print_matrix("Result Matrix R (Optimized)", R, size);*/
 
     /*printf("Speedup: %.2fx\n", naive_time / opt_time);
 

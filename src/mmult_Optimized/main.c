@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
     double naive_time = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("Naive Runtime: %.6f seconds\n", naive_time);
-    print_matrix("Result Matrix R (Naive)", R_naive, size);
+    /* print_matrix("Result Matrix R (Naive)", R_naive, size);*/
 
     args_t args_opt = { .input = input, .output = R, .size = size };
 
@@ -186,9 +186,9 @@ int main(int argc, char** argv) {
     double opt_time = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("Optimized Runtime: %.6f seconds\n", opt_time);
-    print_matrix("Result Matrix R (Optimized)", R, size);
+    print_matrix("Result Matrix R (Optimized)", R, size);*/
 
-    printf("Speedup: %.2fx\n", naive_time / opt_time);
+    /*printf("Speedup: %.2fx\n", naive_time / opt_time);
 
     /* Free memory */
     free(input);

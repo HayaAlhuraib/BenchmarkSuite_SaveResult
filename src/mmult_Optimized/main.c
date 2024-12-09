@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
     printf("Optimized Runtime: %.6f seconds\n", opt_time);
     /* print_matrix("Result Matrix R (Optimized)", R, size);*/
 
-    /*printf("Speedup: %.2fx\n", naive_time / opt_time);
+    printf("Speedup: %.2fx\n", naive_time / opt_time);
 
     /* Free memory */
     free(input);

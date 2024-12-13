@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     scanf("%zu", &cols_B);
 
     /* Allocate matrices */
-    srand((unsigned int)time(NULL)); // Seed the random number generator
+   
 
     float* A = malloc(rows_A * cols_A * sizeof(float));
     float* B = malloc(rows_B * cols_B * sizeof(float));

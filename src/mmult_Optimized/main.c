@@ -78,14 +78,6 @@ int main(int argc, char** argv) {
     setbuf(stdout, NULL);
 
     /* Default settings */
-    int nthreads = 1;
-    int cpu = 0;
-    size_t rows_A = 2;      // Default size
-    size_t cols_A = 2;
-    size_t rows_B = 2;
-    size_t cols_B = 2;
-
-    /* Function pointers for implementations */
     void* (*impl)(void* args) = NULL;
     const char* impl_str = NULL;
 
@@ -105,21 +97,37 @@ int main(int argc, char** argv) {
             }
             continue;
         }
-
-        if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--size") == 0) {
-            assert(++i < argc);
-            rows_A = cols_A = rows_B = cols_B = atoi(argv[i]);
-            continue;
-        }
     }
 
     if (impl == NULL) {
-        fprintf(stderr, "Usage: %s -i {naive|opt} [-s size]\n", argv[0]);
+        fprintf(stderr, "Usage: %s -i {naive|opt}\n", argv[0]);
         exit(1);
     }
 
     /* Create the Result directory */
     create_result_directory();
+
+    /* Prompt the user for matrix dimensions */
+    size_t rows_A, cols_A, rows_B, cols_B;
+
+    printf("Enter the number of rows for Matrix A: ");
+    scanf("%zu", &rows_A);
+
+    printf("Enter the number of columns for Matrix A: ");
+    scanf("%zu", &cols_A);
+
+    printf("Enter the number of rows for Matrix B: ");
+    scanf("%zu", &rows_B);
+
+    /* Ensure cols_A == rows_B */
+    while (cols_A != rows_B) {
+        printf("Number of columns for Matrix A must equal the number of rows for Matrix B.\n");
+        printf("Enter the number of rows for Matrix B: ");
+        scanf("%zu", &rows_B);
+    }
+
+    printf("Enter the number of columns for Matrix B: ");
+    scanf("%zu", &cols_B);
 
     /* Allocate matrices */
     srand((unsigned int)time(NULL)); // Seed the random number generator

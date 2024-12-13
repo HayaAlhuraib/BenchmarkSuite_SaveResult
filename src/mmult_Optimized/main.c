@@ -162,6 +162,8 @@ int main(int argc, char** argv) {
     export_matrix_to_csv("matrix_A.csv", A, rows_A, cols_A);
     export_matrix_to_csv("matrix_B.csv", B, rows_B, cols_B);
 
+    double naive_time = 0.0, opt_time = 0.0;
+
     /* Run naive implementation */
     if (run_both || impl == impl_scalar_naive) {
         args_t args_naive = { .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)), .output = R_naive, .size = rows_A };
@@ -172,8 +174,9 @@ int main(int argc, char** argv) {
         impl_scalar_naive(&args_naive);
         clock_t end_naive = clock();
 
-        double naive_time = (double)(end_naive - start_naive) / CLOCKS_PER_SEC;
+        naive_time = (double)(end_naive - start_naive) / CLOCKS_PER_SEC;
         printf("Naive Implementation Runtime: %.6f seconds\n", naive_time);
+        print_matrix("Result Matrix R (Naive)", R_naive, rows_A, cols_B);
         export_matrix_to_csv("result_naive.csv", R_naive, rows_A, cols_B);
 
         free(args_naive.input);
@@ -189,11 +192,17 @@ int main(int argc, char** argv) {
         impl_scalar_opt(&args_opt);
         clock_t end_opt = clock();
 
-        double opt_time = (double)(end_opt - start_opt) / CLOCKS_PER_SEC;
+        opt_time = (double)(end_opt - start_opt) / CLOCKS_PER_SEC;
         printf("Optimized Implementation Runtime: %.6f seconds\n", opt_time);
+        print_matrix("Result Matrix R (Optimized)", R_opt, rows_A, cols_B);
         export_matrix_to_csv("result_opt.csv", R_opt, rows_A, cols_B);
 
         free(args_opt.input);
+    }
+
+    /* Calculate and print speedup */
+    if (run_both && naive_time > 0 && opt_time > 0) {
+        printf("Speedup: %.2fx\n", naive_time / opt_time);
     }
 
     /* Free memory */

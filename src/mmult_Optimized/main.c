@@ -155,8 +155,8 @@ int main(int argc, char** argv) {
     }
 
     /* Print input matrices */
-    print_matrix("Matrix A", A, rows_A, cols_A);
-    print_matrix("Matrix B", B, rows_B, cols_B);
+   /* print_matrix("Matrix A", A, rows_A, cols_A);*/
+    /*print_matrix("Matrix B", B, rows_B, cols_B);*/
 
     /* Export input matrices */
     export_matrix_to_csv("matrix_A.csv", A, rows_A, cols_A);
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 
         naive_time = (double)(end_naive - start_naive) / CLOCKS_PER_SEC;
         printf("Naive Implementation Runtime: %.6f seconds\n", naive_time);
-        print_matrix("Result Matrix R (Naive)", R_naive, rows_A, cols_B);
+       /* print_matrix("Result Matrix R (Naive)", R_naive, rows_A, cols_B);*/
         export_matrix_to_csv("result_naive.csv", R_naive, rows_A, cols_B);
 
         free(args_naive.input);
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 
         opt_time = (double)(end_opt - start_opt) / CLOCKS_PER_SEC;
         printf("Optimized Implementation Runtime: %.6f seconds\n", opt_time);
-        print_matrix("Result Matrix R (Optimized)", R_opt, rows_A, cols_B);
+       /*  print_matrix("Result Matrix R (Optimized)", R_opt, rows_A, cols_B);*/
         export_matrix_to_csv("result_opt.csv", R_opt, rows_A, cols_B);
 
         free(args_opt.input);

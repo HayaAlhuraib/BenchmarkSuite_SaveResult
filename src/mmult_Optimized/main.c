@@ -135,10 +135,10 @@ int main(int argc, char** argv) {
     /* Allocate matrices */
     srand((unsigned int)time(NULL)); 
 
-    char* A = malloc(rows_A * cols_A * sizeof(char));
-    char* B = malloc(rows_B * cols_B * sizeof(char));
-    char* R_naive = malloc(rows_A * cols_B * sizeof(char));
-    char* R_opt = malloc(rows_A * cols_B * sizeof(char));
+    float* A = malloc(rows_A * cols_A * sizeof(float));
+    float* B = malloc(rows_B * cols_B * sizeof(float));
+    float* R_naive = malloc(rows_A * cols_B * sizeof(float));
+    float* R_opt = malloc(rows_A * cols_B * sizeof(float));
 
     if (!A || !B || !R_naive || !R_opt) {
         fprintf(stderr, "Memory allocation failed.\n");

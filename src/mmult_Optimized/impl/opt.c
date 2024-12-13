@@ -21,7 +21,7 @@ void* impl_scalar_opt(void* args) {
     float* R = (float*)arguments->output;                           // Result matrix R
 
     /* Set block size (tunable parameter) */
-    size_t block_size = 64; // A typical value for cache optimization (adjust if necessary)
+    size_t block_size = 16; // A typical value for cache optimization (adjust if necessary)
 
     /* Initialize Result Matrix */
     for (size_t i = 0; i < size; i++) {

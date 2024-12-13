@@ -46,8 +46,6 @@ void create_result_directory() {
         } else {
             perror("Error creating Result directory");
         }
-    } else {
-        printf("\n ");
     }
 }
 
@@ -79,35 +77,51 @@ int main(int argc, char** argv) {
     /* Set the buffer for printf to NULL */
     setbuf(stdout, NULL);
 
-    /* Arguments */
+    /* Default settings */
     int nthreads = 1;
-    int cpu      = 0;
+    int cpu = 0;
+    size_t rows_A = 2;      // Default size
+    size_t cols_A = 2;
+    size_t rows_B = 2;
+    size_t cols_B = 2;
+
+    /* Function pointers for implementations */
+    void* (*impl)(void* args) = NULL;
+    const char* impl_str = NULL;
+
+    /* Parse command-line arguments */
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--impl") == 0) {
+            assert(++i < argc);
+            if (strcmp(argv[i], "naive") == 0) {
+                impl = impl_scalar_naive;
+                impl_str = "naive";
+            } else if (strcmp(argv[i], "opt") == 0) {
+                impl = impl_scalar_opt;
+                impl_str = "opt";
+            } else {
+                fprintf(stderr, "Unknown implementation: %s\n", argv[i]);
+                exit(1);
+            }
+            continue;
+        }
+
+        if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--size") == 0) {
+            assert(++i < argc);
+            rows_A = cols_A = rows_B = cols_B = atoi(argv[i]);
+            continue;
+        }
+    }
+
+    if (impl == NULL) {
+        fprintf(stderr, "Usage: %s -i {naive|opt} [-s size]\n", argv[0]);
+        exit(1);
+    }
 
     /* Create the Result directory */
     create_result_directory();
 
-    /* Prompt the user for matrix dimensions */
-    size_t rows_A, cols_A, rows_B, cols_B;
-
-    printf("Enter the number of rows for Matrix A: ");
-    scanf("%zu", &rows_A);
-
-    printf("Enter the number of columns for Matrix A: ");
-    scanf("%zu", &cols_A);
-
-    printf("Enter the number of rows for Matrix B: ");
-    scanf("%zu", &rows_B);
-
-    while (rows_B != cols_A) {
-        printf("Number of rows for Matrix B must be equal to the number of columns for Matrix A (%zu).\n", cols_A);
-        printf("Enter the number of rows for Matrix B: ");
-        scanf("%zu", &rows_B);
-    }
-
-    printf("Enter the number of columns for Matrix B: ");
-    scanf("%zu", &cols_B);
-
-    /* Initialize matrices */
+    /* Allocate matrices */
     srand((unsigned int)time(NULL)); // Seed the random number generator
 
     float* A = malloc(rows_A * cols_A * sizeof(float));
@@ -121,11 +135,11 @@ int main(int argc, char** argv) {
 
     /* Initialize input matrices */
     for (size_t i = 0; i < rows_A * cols_A; i++) {
-        A[i] = (float)(rand() % 10); // Random numbers between 0 and 9
+        A[i] = (float)(rand() % 10);
     }
 
     for (size_t i = 0; i < rows_B * cols_B; i++) {
-        B[i] = (float)(rand() % 10); // Random numbers between 0 and 9
+        B[i] = (float)(rand() % 10);
     }
 
     /* Print input matrices */
@@ -137,44 +151,33 @@ int main(int argc, char** argv) {
     export_matrix_to_csv("matrix_B.csv", B, rows_B, cols_B);
 
     /* Prepare arguments */
-    args_t args = { .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)), .output = R, .size = rows_A };
+    args_t args = {
+        .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)),
+        .output = R,
+        .size = rows_A
+    };
 
     memcpy(args.input, A, rows_A * cols_A * sizeof(float));
     memcpy((float*)args.input + rows_A * cols_A, B, rows_B * cols_B * sizeof(float));
 
-    /* Compare Naive and Optimized Implementations */
-    float* R_naive = malloc(rows_A * cols_B * sizeof(float));
-    args_t args_naive = { .input = args.input, .output = R_naive, .size = rows_A };
-
+    /* Run the selected implementation */
     clock_t start = clock();
-    impl_scalar_naive(&args_naive);
+    impl(&args);
     clock_t end = clock();
-    export_matrix_to_csv("result_naive.csv", R_naive, rows_A, cols_B);
-    double naive_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-    printf("Naive Runtime: %.6f seconds\n", naive_time);
-    print_matrix("Result Matrix R (Naive)", R_naive, rows_A, cols_B);
+    double runtime = (double)(end - start) / CLOCKS_PER_SEC;
 
-    float* R_opt = malloc(rows_A * cols_B * sizeof(float));
-    args_t args_opt = { .input = args.input, .output = R_opt, .size = rows_A };
+    /* Export result matrix */
+    export_matrix_to_csv("result.csv", R, rows_A, cols_B);
 
-    start = clock();
-    impl_scalar_opt(&args_opt);
-    end = clock();
-    export_matrix_to_csv("result_optimized.csv", R_opt, rows_A, cols_B);
-    double opt_time = (double)(end - start) / CLOCKS_PER_SEC;
-
-    printf("Optimized Runtime: %.6f seconds\n", opt_time);
-    print_matrix("Result Matrix R (Optimized)", R_opt, rows_A, cols_B);
-
-    printf("Speedup: %.2fx\n", naive_time / opt_time);
+    /* Print result matrix and runtime */
+    print_matrix("Result Matrix R", R, rows_A, cols_B);
+    printf("%s Implementation Runtime: %.6f seconds\n", impl_str, runtime);
 
     /* Free memory */
     free(A);
     free(B);
     free(R);
-    free(R_naive);
-    free(R_opt);
     free(args.input);
 
     return 0;

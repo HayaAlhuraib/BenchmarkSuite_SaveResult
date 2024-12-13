@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
     /* Default settings */
     void* (*impl)(void* args) = NULL;
     const char* impl_str = NULL;
+    bool run_both = false;
 
     /* Parse command-line arguments */
     for (int i = 1; i < argc; i++) {
@@ -91,6 +92,8 @@ int main(int argc, char** argv) {
             } else if (strcmp(argv[i], "opt") == 0) {
                 impl = impl_scalar_opt;
                 impl_str = "opt";
+            } else if (strcmp(argv[i], "both") == 0) {
+                run_both = true;
             } else {
                 fprintf(stderr, "Unknown implementation: %s\n", argv[i]);
                 exit(1);
@@ -99,8 +102,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (impl == NULL) {
-        fprintf(stderr, "Usage: %s -i {naive|opt}\n", argv[0]);
+    if (impl == NULL && !run_both) {
+        fprintf(stderr, "Usage: %s -i {naive|opt|both}\n", argv[0]);
         exit(1);
     }
 
@@ -134,9 +137,10 @@ int main(int argc, char** argv) {
 
     float* A = malloc(rows_A * cols_A * sizeof(float));
     float* B = malloc(rows_B * cols_B * sizeof(float));
-    float* R = malloc(rows_A * cols_B * sizeof(float));
+    float* R_naive = malloc(rows_A * cols_B * sizeof(float));
+    float* R_opt = malloc(rows_A * cols_B * sizeof(float));
 
-    if (!A || !B || !R) {
+    if (!A || !B || !R_naive || !R_opt) {
         fprintf(stderr, "Memory allocation failed.\n");
         exit(1);
     }
@@ -158,35 +162,45 @@ int main(int argc, char** argv) {
     export_matrix_to_csv("matrix_A.csv", A, rows_A, cols_A);
     export_matrix_to_csv("matrix_B.csv", B, rows_B, cols_B);
 
-    /* Prepare arguments */
-    args_t args = {
-        .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)),
-        .output = R,
-        .size = rows_A
-    };
+    /* Run naive implementation */
+    if (run_both || impl == impl_scalar_naive) {
+        args_t args_naive = { .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)), .output = R_naive, .size = rows_A };
+        memcpy(args_naive.input, A, rows_A * cols_A * sizeof(float));
+        memcpy((float*)args_naive.input + rows_A * cols_A, B, rows_B * cols_B * sizeof(float));
 
-    memcpy(args.input, A, rows_A * cols_A * sizeof(float));
-    memcpy((float*)args.input + rows_A * cols_A, B, rows_B * cols_B * sizeof(float));
+        clock_t start_naive = clock();
+        impl_scalar_naive(&args_naive);
+        clock_t end_naive = clock();
 
-    /* Run the selected implementation */
-    clock_t start = clock();
-    impl(&args);
-    clock_t end = clock();
+        double naive_time = (double)(end_naive - start_naive) / CLOCKS_PER_SEC;
+        printf("Naive Implementation Runtime: %.6f seconds\n", naive_time);
+        export_matrix_to_csv("result_naive.csv", R_naive, rows_A, cols_B);
 
-    double runtime = (double)(end - start) / CLOCKS_PER_SEC;
+        free(args_naive.input);
+    }
 
-    /* Export result matrix */
-    export_matrix_to_csv("result.csv", R, rows_A, cols_B);
+    /* Run optimized implementation */
+    if (run_both || impl == impl_scalar_opt) {
+        args_t args_opt = { .input = malloc((rows_A * cols_A + rows_B * cols_B) * sizeof(float)), .output = R_opt, .size = rows_A };
+        memcpy(args_opt.input, A, rows_A * cols_A * sizeof(float));
+        memcpy((float*)args_opt.input + rows_A * cols_A, B, rows_B * cols_B * sizeof(float));
 
-    /* Print result matrix and runtime */
-    print_matrix("Result Matrix R", R, rows_A, cols_B);
-    printf("%s Implementation Runtime: %.6f seconds\n", impl_str, runtime);
+        clock_t start_opt = clock();
+        impl_scalar_opt(&args_opt);
+        clock_t end_opt = clock();
+
+        double opt_time = (double)(end_opt - start_opt) / CLOCKS_PER_SEC;
+        printf("Optimized Implementation Runtime: %.6f seconds\n", opt_time);
+        export_matrix_to_csv("result_opt.csv", R_opt, rows_A, cols_B);
+
+        free(args_opt.input);
+    }
 
     /* Free memory */
     free(A);
     free(B);
-    free(R);
-    free(args.input);
+    free(R_naive);
+    free(R_opt);
 
     return 0;
 }
